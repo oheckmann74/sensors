@@ -51,7 +51,7 @@ def sample_sensors():
 
 
 #################
-### HARDWARE
+### BETTER BUTTONS
 #################
 
 class ValueButton(Button):
@@ -59,16 +59,30 @@ class ValueButton(Button):
         Button.__init__(self, pin)
         self.action_value = action_value
 
+####################
+### LED SETUP
+####################
 
-def blink(device, num, duration, off_duration=0):
-    for i in range(num):
-        device.on()
-        sleep(duration)
-        device.off()
-        if i < num - 1:
-            sleep(off_duration if off_duration != 0 else duration)
+class LEDs():
+    def __init__(self, red_pin, green_pin = None):
+        self.red = LED(red_pin)
+        self.green = None
+        if green_pin:
+            self.green = LED(green_pin) 
 
+    def signal_error(self, error_code): 
+        self.red.blink(1,.33,error_code)
 
+    def signal_ok(self):
+        if self.green:
+            self.green.blink(.33,n=2)
+        else: 
+            self.red.blink(.2,.2 n=2)
+
+    def signal_ready(self): 
+        if self.green:
+            self.green.blink(.1, .2, n=3, True)
+        self.red.blink(.1, .2, n=3, True)
 
 ###################
 ### CONTROL FLOW
@@ -80,15 +94,15 @@ def button_action(button):
     try:
         post_thingspeak(sample_sensors(), button.action_value)
         post_sentiment_coda(button.action_value)
-        blink(red, 1, .3)
+        leds.signal_ok()
     except:
-        blink(red, 10, .1, .2)
+        leds.signal_error(5)
 
 
 if __name__ == '__main__':
 
     PINS = [12, 1, 24, 23, 14]
-    red = LED(26)
+    leds = LEDs(26)
 
     buttons = []
     i = 1
@@ -99,7 +113,7 @@ if __name__ == '__main__':
         i += 1
 
     # startup blink
-    blink(red, 3, .1, .4)
+    leds.signal_ready()
 
     while True:
         temp = sample_sensors()
