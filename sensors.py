@@ -77,12 +77,12 @@ class LEDs():
         if self.green:
             self.green.blink(.33,n=2)
         else: 
-            self.red.blink(.2,.2 n=2)
+            self.red.blink(.2,.2, n=2)
 
     def signal_ready(self): 
         if self.green:
-            self.green.blink(.1, .2, n=3, True)
-        self.red.blink(.1, .2, n=3, True)
+            self.green.blink(.1, .2, n=3, background=True)
+        self.red.blink(.1, .2, n=3, background=True)
 
 ###################
 ### CONTROL FLOW
