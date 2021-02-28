@@ -1,6 +1,6 @@
 import os
 from signal import pause
-from time import sleep
+from time import sleep, time
 
 import requests
 from gpiozero import Button
@@ -55,19 +55,27 @@ def sample_sensors():
 #################
 
 class FlexButton(Button):
-    def __init__(self, pin, onShortPress, onLongPress = None):
+    def __init__(self, pin, on_short_press, on_long_press = None):
         Button.__init__(self, pin)
-        self.nShortPress = onShortPress
-        self.onLongPress = onLongPress
-        self.whenReleased = self.action()
-        
-    def action(self):
-        if self.onLongPress != None and held_time > 3:
-            print("long")
-            onLongPress
+        self.on_short_press = on_short_press
+        self.on_long_press = on_long_press
+        #self.when_pressed = lambda: print('hello')
+ 
+    def handle_press(self):
+        print("handle")
+        start_time=time()
+        diff=0
+
+        while self.is_active and (diff < 2):
+            diff=time()-start_time
+
+        if diff < 2 or self.on_long_press == None:
+            print('long')
+            self.on_short_press()
         else:
-            onShortPress
-            print("short")
+            print('short')
+            self.on_long_press()
+
 
 
 
@@ -124,6 +132,7 @@ if __name__ == '__main__':
     i = 1
     for pin in PINS:
         button = FlexButton(pin, lambda: sentiment_action(i), shutdown_action)
+        button.when_pressed = button.handle_press
         i += 1
 
     # startup blink
