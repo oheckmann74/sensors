@@ -61,7 +61,7 @@ class FlexButton(Button):
         self.onLongPress = onLongPress
     
     def when_released(self):
-        if self.onLongPress && held_time > 3:
+        if self.onLongPress != None && held_time > 3:
             onLongPress
         else:
             onShortPress
