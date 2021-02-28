@@ -55,14 +55,14 @@ def sample_sensors():
 #################
 
 class FlexButton(Button):
-    def __init__(self, pin, on_short_press, on_long_press = None):
+    def __init__(self, pin, buttonvalue, on_short_press, on_long_press = None):
         Button.__init__(self, pin)
+        self.buttonvalue = buttonvalue
         self.on_short_press = on_short_press
         self.on_long_press = on_long_press
-        #self.when_pressed = lambda: print('hello')
+        self.when_pressed = self.handle_press
  
     def handle_press(self):
-        print("handle")
         start_time=time()
         diff=0
 
@@ -70,11 +70,9 @@ class FlexButton(Button):
             diff=time()-start_time
 
         if diff < 2 or self.on_long_press == None:
-            print('long')
-            self.on_short_press()
+            self.on_short_press(self)
         else:
-            print('short')
-            self.on_long_press()
+            self.on_long_press(self)
 
 
 
@@ -109,11 +107,10 @@ class LEDs():
 ###################
 
 
-def sentiment_action(value):
-    print(value)
+def sentiment_action(button):
     try:
-        post_thingspeak(sample_sensors(), value)
-        post_sentiment_coda(alue)
+        post_thingspeak(sample_sensors(), button.buttonvalue)
+        post_sentiment_coda(button.buttonvalue)
         leds.signal_ok()
     except:
         leds.signal_error(5)
@@ -121,7 +118,8 @@ def sentiment_action(value):
         
 from subprocess import call
 
-def shutdown_action():
+def shutdown_action(button):
+    leds.signal_ready()
     call("sudo nohup shutdown -h now", shell=True)
 
 if __name__ == '__main__':
@@ -129,10 +127,11 @@ if __name__ == '__main__':
     PINS = [12, 1, 24, 23, 14] # typically three or 5 buttons
     leds = LEDs(26) # either one LED or two (red and green)
 
+    buttons = []
     i = 1
     for pin in PINS:
-        button = FlexButton(pin, lambda: sentiment_action(i), shutdown_action)
-        button.when_pressed = button.handle_press
+        button = FlexButton(pin, i, sentiment_action, shutdown_action)
+        buttons.append(button)
         i += 1
 
     # startup blink
