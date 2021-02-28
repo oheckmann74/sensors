@@ -54,10 +54,19 @@ def sample_sensors():
 ### BETTER BUTTONS
 #################
 
-class ValueButton(Button):
-    def __init__(self, pin, action_value):
+class FlexButton(Button):
+    def __init__(self, pin, onShortPress, onLongPress = None):
         Button.__init__(self, pin)
-        self.action_value = action_value
+        self.nShortPress = onShortPress
+        self.onLongPress = onLongPress
+    
+    def when_released(self):
+        if self.onLongPress && held_time > 3:
+            onLongPress
+        else:
+            onShortPress
+
+
 
 ####################
 ### LED SETUP
@@ -89,27 +98,29 @@ class LEDs():
 ###################
 
 
-def button_action(button):
-    print(button.action_value)
+def sentiment_action(value):
+    print(value)
     try:
-        post_thingspeak(sample_sensors(), button.action_value)
-        post_sentiment_coda(button.action_value)
+        post_thingspeak(sample_sensors(), value)
+        post_sentiment_coda(alue)
         leds.signal_ok()
     except:
         leds.signal_error(5)
+        
+        
+from subprocess import call
 
+def shutdown_action():
+    call("sudo nohup shutdown -h now", shell=True)
 
 if __name__ == '__main__':
 
-    PINS = [12, 1, 24, 23, 14]
-    leds = LEDs(26)
+    PINS = [12, 1, 24, 23, 14] # typically three or 5 buttons
+    leds = LEDs(26) # either one LED or two (red and green)
 
-    buttons = []
     i = 1
     for pin in PINS:
-        button = ValueButton(pin, i)
-        button.when_released = button_action
-        buttons.append(button)
+        button = FlexButton(pin, lambda: sentiment_action(i), shutdown_action)
         i += 1
 
     # startup blink
