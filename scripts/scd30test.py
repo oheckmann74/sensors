@@ -6,7 +6,24 @@ import adafruit_scd30
 i2c = busio.I2C(board.SCL, board.SDA)
 scd = adafruit_scd30.SCD30(i2c)
 
+# scd.temperature_offset = 10
+print("Temperature offset:", scd.temperature_offset)
+
+# scd.measurement_interval = 4
+print("Measurement interval:", scd.measurement_interval)
+
 # scd.self_calibration_enabled = True
+print("Self-calibration enabled:", scd.self_calibration_enabled)
+
+# scd.ambient_pressure = 1100
+print("Ambient Pressure:", scd.ambient_pressure)
+
+# scd.altitude = 100
+print("Altitude:", scd.altitude, "meters above sea level")
+
+# scd.forced_recalibration_reference = 409
+print("Forced recalibration reference:", scd.forced_recalibration_reference)
+print("")
 
 while True:
     # since the measurement interval is long (2+ seconds) we check for new data before reading

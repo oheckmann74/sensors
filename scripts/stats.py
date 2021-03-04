@@ -2,7 +2,6 @@ import time
 import board
 import busio
 import adafruit_scd30
-import busio
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 import subprocess
