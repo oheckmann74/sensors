@@ -1,6 +1,6 @@
 import os
 from signal import pause
-from time import sleep, time
+import time
 
 import requests
 from gpiozero import Button
@@ -97,11 +97,11 @@ class FlexButton(Button):
         self.when_pressed = self.handle_press
 
     def handle_press(self):
-        start_time = time()
+        start_time = time.time()
         diff = 0
 
         while self.is_active and (diff < 2):
-            diff = time() - start_time
+            diff = time.time() - start_time
 
         if diff < 2 or self.on_long_press is None:
             self.on_short_press(self)
@@ -120,26 +120,27 @@ class LEDs():
         if green_pin:
             self.green = LED(green_pin)
 
+    def blink(self, led, on, off, n=0, background=False):
+        if led:
+            if time.localtime().tm_hour < 22 and time.localtime().tm_hour >= 7:
+                led.blink(on, off, n=n, background=background)
+
     def signal_error(self, error_code):
-        self.red.blink(1, .33, error_code)
+        self.blink(self.red, 1, .33, error_code)
 
     def signal_ok(self):
-        self.red.blink(.33, n=1)
-        if self.green:
-            self.green.blink(.33, n=1)
+        self.blink(self.red, .33, .33, n=1)
+        self.blink(self.green, .33, .33, n=1)
 
     def signal_ready(self):
-        if self.green:
-            self.green.blink(.2, .2, n=3, background=True)
-        self.red.blink(.2, .2, n=3, background=True)
+        self.blink(self.green, .2, .2, n=3, background=True)
+        self.blink(self.red, .2, .2, n=3, background=True)
 
     def signal_bad_air(self):
-        self.red.blink(3, 7, n=3, background=True)
+        self.blink(self.red, 3, 7, n=3, background=True)
 
     def signal_good_air(self):
-        if not self.green:
-            return
-        self.green.blink(3, 7, n=3, background=True)
+        self.blink(self.green, 3, 7, n=3, background=True)
 
 ###################
 ### CONTROL FLOW
@@ -191,4 +192,4 @@ if __name__ == '__main__':
                     leds.signal_bad_air()
                 else:
                     leds.signal_good_air()
-        sleep(30)
+        time.sleep(30)
