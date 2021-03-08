@@ -8,7 +8,7 @@ from gpiozero import LED
 
 import thingspeak
 import codaconfig  # contains TABLE_ID, DOC_ID, API_TOKEN, SENTIMENT_COLUMN_ID
-import config  # contains CHANNEL and API_KEY
+import config  # contains CHANNEL, API_KEY, and THRESHOLD_PPM
 
 import board
 import busio
@@ -187,7 +187,7 @@ if __name__ == '__main__':
         else:
             post_thingspeak(data)
             if data["co2"]:
-                if data["co2"] > THRESHOLD_PPM:
+                if data["co2"] > config.THRESHOLD_PPM:
                     leds.signal_bad_air()
                 else:
                     leds.signal_good_air()
